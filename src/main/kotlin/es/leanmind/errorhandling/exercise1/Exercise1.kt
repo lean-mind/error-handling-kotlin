@@ -13,12 +13,12 @@ class NumberValue(
 class StringValue(
         private val value: String
 ): Value {
-    override fun value(): Any = value
+    override fun value(): String = value
 }
 
 class ValueList<T : Value>(
         private val values: MutableList<T>
-) {
+) : Value {
     fun add(value: T) {
         values.add(value)
     }
@@ -27,8 +27,12 @@ class ValueList<T : Value>(
         return ValueList(values.filter(predicate).toMutableList())
     }
 
+    override fun value(): ValueList<T> {
+        return ValueList(values)
+    }
+
     override fun toString(): String {
-        return values.joinToString(", ") { it.value().toString() }
+        return "[${values.joinToString(", ") { it.value().toString() }}]"
     }
 }
 

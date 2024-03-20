@@ -16,11 +16,13 @@ class Exercise1Should {
 
         values.add(StringValue("foo"))
 
+        values.add(ValueList(mutableListOf(numberValue1, numberValue2)))
+
         val numberValues = values.filter { it is NumberValue }
         val stringValues = values.filter { it is StringValue }
 
-        assertThat(values.toString()).isEqualTo("1, 2, hello, world, foo")
-        assertThat(numberValues.toString()).isEqualTo("1, 2")
-        assertThat(stringValues.toString()).isEqualTo("hello, world, foo")
+        assertThat(values.toString()).isEqualTo("[1, 2, hello, world, foo, [1, 2]]")
+        assertThat(numberValues.toString()).isEqualTo("[1, 2]")
+        assertThat(stringValues.toString()).isEqualTo("[hello, world, foo]")
     }
 }
