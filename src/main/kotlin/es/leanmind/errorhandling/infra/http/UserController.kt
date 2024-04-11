@@ -39,6 +39,6 @@ class UserController {
     }
 
     private fun UserDto.toDomain(): User {
-        return User.from(this.username, this.password, this.role)
+        return User(this.username, this.password, this.role)
     }
 }

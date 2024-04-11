@@ -3,25 +3,28 @@ package es.leanmind.errorhandling.domain
 import es.leanmind.errorhandling.application.EmptyDataNotAllowedException
 import es.leanmind.errorhandling.application.PasswordTooShortException
 
-data class User private constructor(
-    var username: String,
-    var password: String,
-    var role: UserRole = UserRole.STANDARD
+class User(
+    username: String,
+    password: String,
+    role: UserRole = UserRole.STANDARD
 ) {
-    fun isAdmin(): Boolean = role == UserRole.ADMIN
+    val username: String
+    val password: String
+    val role: UserRole
 
-    companion object {
-        fun from(username: String, password: String, role: UserRole = UserRole.STANDARD): User {
-            if (username.isEmpty() || password.isEmpty()) {
-                throw EmptyDataNotAllowedException()
-            }
-            if (password.length < 8) {
-                throw PasswordTooShortException()
-            }
-
-            return User(username, password, role)
+    init {
+        if (username.isEmpty() || password.isEmpty()) {
+            throw EmptyDataNotAllowedException()
         }
+        if (password.length < 8) {
+            throw PasswordTooShortException()
+        }
+
+        this.username = username
+        this.password = password
+        this.role = role
     }
+    fun isAdmin(): Boolean = role == UserRole.ADMIN
 }
 
 enum class UserRole {
