@@ -1,9 +1,11 @@
 package es.leanmind.errorhandling.application
 
 sealed interface Error {
-    object UserAlreadyExists: Error
-    object TooManyAdmins: Error
-    object CannotSaveUser: Error
+    data object UserAlreadyExists: Error
+    data object TooManyAdmins: Error
+    data object CannotSaveUser: Error
+    data object EmptyDataNotAllowed : Error
+    data object PasswordTooShort : Error
 }
 
 class CreateUserResult private constructor(

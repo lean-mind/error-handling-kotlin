@@ -1,10 +1,9 @@
 package es.leanmind.errorhandling.infra.http
 
 import es.leanmind.errorhandling.application.CreateUserUseCase
-import es.leanmind.errorhandling.application.EmptyDataNotAllowedException
 import es.leanmind.errorhandling.application.Error
-import es.leanmind.errorhandling.application.PasswordTooShortException
 import es.leanmind.errorhandling.domain.User
+import es.leanmind.errorhandling.exercise2.Result
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
@@ -23,22 +22,26 @@ class UserController {
 
     @PostMapping
     fun createUser(@RequestBody userDto: UserDto): ResponseEntity<*> {
-        return try {
-            val createUserResult = createUserUseCase.execute(userDto.toDomain())
-            return when (createUserResult.error) {
-                Error.UserAlreadyExists -> status(BAD_REQUEST).body("User already exists.")
-                Error.TooManyAdmins -> status(BAD_REQUEST).body("Too many admins.")
-                Error.CannotSaveUser -> status(INTERNAL_SERVER_ERROR).body("Cannot create user.")
-                null -> status(CREATED).build<Unit>()
+        val userResult = userDto.toDomain()
+
+        if (userResult.isFailure()) {
+            when (userResult.error()) {
+                Error.EmptyDataNotAllowed -> status(BAD_REQUEST).body("Username and password cannot be empty.")
+                Error.PasswordTooShort -> status(BAD_REQUEST).body("Password is too short.")
+                else -> {}
             }
-        } catch (exception: PasswordTooShortException) {
-            status(BAD_REQUEST).body("Password is too short.")
-        } catch (exception: EmptyDataNotAllowedException) {
-            status(BAD_REQUEST).body("Username and password cannot be empty.")
+        }
+
+        val createUserResult = createUserUseCase.execute(userResult.value()!!)
+        return when (createUserResult.error) {
+            Error.UserAlreadyExists -> status(BAD_REQUEST).body("User already exists.")
+            Error.TooManyAdmins -> status(BAD_REQUEST).body("Too many admins.")
+            Error.CannotSaveUser -> status(INTERNAL_SERVER_ERROR).body("Cannot create user.")
+            else -> status(CREATED).build<Unit>()
         }
     }
 
-    private fun UserDto.toDomain(): User {
-        return User(this.username, this.password, this.role)
+    private fun UserDto.toDomain(): Result<User> {
+        return User.create(this.username, this.password, this.role)
     }
 }
